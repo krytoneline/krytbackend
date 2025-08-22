@@ -276,7 +276,6 @@ router.get(
 
 
 //Review
-
 router.post(
     "/giverate",
     isAuthenticated(["USER", "ADMIN", "SELLER"]),
