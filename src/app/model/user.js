@@ -38,19 +38,19 @@ const userSchema = new mongoose.Schema(
     },
     wallet: {
       type: Number,
-      default:0
+      default: 0
     },
     orders: {
       type: Number,
-      default:0
+      default: 0
     },
     earning: {
       type: Number,
-      default:0
+      default: 0
     },
-    commission:{
-        type: Number,
-        default:0
+    commission: {
+      type: Number,
+      default: 0
     },
     shiping_address: {
       type: Object,
@@ -58,16 +58,19 @@ const userSchema = new mongoose.Schema(
     is_verified: {
       type: Boolean,
       default: false
-  },
-  is_quality: {
+    },
+    is_quality: {
       type: Boolean,
       default: false
-  },
-  subscription: {
-    type: Object,
-   default:{}
-}, 
-
+    },
+    subscription: {
+      type: Object,
+      default: {}
+    },
+    trial_subscription: {
+      type: Boolean,
+      default: false
+    },
     type: {
       type: String,
       enum: ["USER", "ADMIN", "SELLER"],
