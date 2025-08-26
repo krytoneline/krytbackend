@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Store = mongoose.model("Store");
 const response = require("./../responses");
-const {myStoreCreation} = require("../services/mailNotification");
+const { myStoreCreation } = require("../services/mailNotification1");
 
 
 
@@ -13,7 +13,7 @@ module.exports = {
             let cat = new Store(payload);
             await cat.save();
             // await myStoreCreation({email:cat.email});
-            return response.ok(res, { message: 'Your store created successfully. Now you can access you dashbord!',store:cat });
+            return response.ok(res, { message: 'Your store created successfully. Now you can access you dashbord!', store: cat });
         } catch (error) {
             return response.error(res, error);
         }

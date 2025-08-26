@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Blog = mongoose.model("Blog");
 const response = require("./../responses");
-const mailNotification = require("../services/mailNotification");
+const mailNotification = require("../services/mailNotification1");
 
 module.exports = {
   getBloggCategory: async (req, res) => {

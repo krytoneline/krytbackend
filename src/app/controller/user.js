@@ -3,7 +3,7 @@ const userHelper = require("./../helper/user");
 const response = require("./../responses");
 const passport = require("passport");
 const jwtService = require("./../services/jwtService");
-const mailNotification = require("./../services/mailNotification");
+const mailNotification = require("../services/mailNotification");
 const mongoose = require("mongoose");
 // const Device = mongoose.model("Device");
 const User = mongoose.model("User");
@@ -21,19 +21,19 @@ const ChatConnection = mongoose.model("ChatConnection");
 
 module.exports = {
 
-createConnection:async(req, res)=>{
-  try {
-  const data = req.body
-  let con = await ChatConnection.findOne({ conn_id: data.conn_id })
-  if (!con) {
-      const c = await ChatConnection.create(data)
-      con = await ChatConnection.findOne({ conn_id: c.conn_id }).populate('user', 'username profile')
-  }
-  return response.ok(res, {Chatconnection:con} );
-} catch (error) {
-  return response.error(res, error);
-}
-},
+  createConnection: async (req, res) => {
+    try {
+      const data = req.body
+      let con = await ChatConnection.findOne({ conn_id: data.conn_id })
+      if (!con) {
+        const c = await ChatConnection.create(data)
+        con = await ChatConnection.findOne({ conn_id: c.conn_id }).populate('user', 'username profile')
+      }
+      return response.ok(res, { Chatconnection: con });
+    } catch (error) {
+      return response.error(res, error);
+    }
+  },
 
   // login controller
   login: (req, res) => {
@@ -76,6 +76,7 @@ createConnection:async(req, res)=>{
       return response.ok(res, { message: "Subscribed Succesfully", newresponse });
     } catch { }
   },
+
   signUp: async (req, res) => {
     try {
       const payload = req.body;
@@ -108,13 +109,19 @@ createConnection:async(req, res)=>{
         });
         user.password = user.encryptPassword(req.body.password);
         await user.save();
-        await mailNotification.welcomeMail(user)
+
+        await mailNotification.welcomeMail({
+          username: user?.username,
+          email: user?.email,
+        });
+
         res.status(200).json({ success: true, data: user });
       }
     } catch (error) {
       return response.error(res, error);
     }
   },
+
   changePasswordProfile: async (req, res) => {
     try {
       let user = await User.findById(req.user.id);
@@ -123,12 +130,17 @@ createConnection:async(req, res)=>{
       }
       user.password = user.encryptPassword(req.body.password);
       await user.save();
-      mailNotification.passwordChange({ email: user.email });
+
+      await mailNotification.passwordChange({
+        email: user.email
+      });
+
       return response.ok(res, { message: "Password changed." });
     } catch (error) {
       return response.error(res, error);
     }
   },
+
   me: async (req, res) => {
     try {
       let user = userHelper.find({ _id: req.user.id }).lean()
@@ -137,6 +149,7 @@ createConnection:async(req, res)=>{
       return response.error(res, error);
     }
   },
+
   updateUser: async (req, res) => {
     try {
       delete req.body.password;
@@ -146,6 +159,7 @@ createConnection:async(req, res)=>{
       return response.error(res, error);
     }
   },
+
   sendOTP: async (req, res) => {
     try {
       const email = req.body.email;
@@ -180,6 +194,7 @@ createConnection:async(req, res)=>{
       return response.error(res, error);
     }
   },
+
   verifyOTP: async (req, res) => {
     try {
       const otp = req.body.otp;
@@ -207,6 +222,7 @@ createConnection:async(req, res)=>{
       return response.error(res, error);
     }
   },
+
   changePassword: async (req, res) => {
     try {
       const token = req.body.token;
@@ -227,7 +243,9 @@ createConnection:async(req, res)=>{
       await Verification.findByIdAndDelete(verID);
       user.password = user.encryptPassword(password);
       await user.save();
-      //mailNotification.passwordChange({ email: user.email });
+      await mailNotification.passwordChange({
+        email: user.email
+      });
       return response.ok(res, { message: "Password changed ! Login now." });
     } catch (error) {
       return response.error(res, error);
@@ -246,16 +264,16 @@ createConnection:async(req, res)=>{
   getSellerList: async (req, res) => {
     try {
       // let user = await User.find({ type: req.params.type });
-      let cond ={}
-      if(req.body.curDate){
+      let cond = {}
+      if (req.body.curDate) {
         const newEt = new Date(new Date(req.body.curDate).setDate(new Date(req.body.curDate).getDate() + 1))
         cond.createdAt = { $gte: new Date(req.body.curDate), $lte: newEt };
-      } 
+      }
       let user = await User.aggregate([
         {
           $match: cond
         },
-        { $sort : { createdAt : -1 } },
+        { $sort: { createdAt: -1 } },
         {
           $lookup: {
             from: 'stores',
@@ -290,6 +308,7 @@ createConnection:async(req, res)=>{
       return response.error(res, error);
     }
   },
+
   updateSettings: async (req, res) => {
     try {
       await User.findByIdAndUpdate(req.user.id, { $set: req.body });
@@ -497,8 +516,8 @@ createConnection:async(req, res)=>{
 
   getGetInTouch: async (req, res) => {
     try {
-      let cond ={}
-      if(req.body.curDate){
+      let cond = {}
+      if (req.body.curDate) {
         const newEt = new Date(new Date(req.body.curDate).setDate(new Date(req.body.curDate).getDate() + 1))
         cond.createdAt = { $gte: new Date(req.body.curDate), $lte: newEt };
       }
@@ -560,13 +579,13 @@ createConnection:async(req, res)=>{
       let cond = {
         posted_by: req.user.id,
       }
-      if(payload.seller){
-        cond.seller=payload.seller
-      }else{
+      if (payload.seller) {
+        cond.seller = payload.seller
+      } else {
         cond.product = payload.product
       }
       const re = await Review.findOne(cond);
-      
+
       if (re) {
         re.description = payload.description;
         re.rating = payload.rating;
@@ -606,7 +625,7 @@ createConnection:async(req, res)=>{
 
   getTransaction: async (req, res) => {
     try {
-      const allTransaction = await Transaction.find({userid:req.user.id}).sort({"createdAt":-1})
+      const allTransaction = await Transaction.find({ userid: req.user.id }).sort({ "createdAt": -1 })
       res.status(200).json({
         success: true,
         data: allTransaction,
@@ -622,9 +641,9 @@ createConnection:async(req, res)=>{
 
   createWalletRequest: async (req, res) => {
     try {
-      req.body.userid=req.user.id
+      req.body.userid = req.user.id
       const u = await User.findById(req.user.id)
-      if(u.wallet < req.body.amount){
+      if (u.wallet < req.body.amount) {
         return res.status(400).json({
           success: false,
           message: "Insufficient funds. Please check your balance and try again.",
@@ -647,11 +666,11 @@ createConnection:async(req, res)=>{
 
   getWalletRequest: async (req, res) => {
     try {
-      const cond ={}
-      if(req.user.type === 'SELLER'){
-        cond.userid= req.user.id
+      const cond = {}
+      if (req.user.type === 'SELLER') {
+        cond.userid = req.user.id
       }
-      const allTransaction = await WalletRequest.find(cond).populate('userid','wallet').sort({'createdAt':-1})
+      const allTransaction = await WalletRequest.find(cond).populate('userid', 'wallet').sort({ 'createdAt': -1 })
       res.status(200).json({
         success: true,
         data: allTransaction,
@@ -669,22 +688,22 @@ createConnection:async(req, res)=>{
   UpdateWalletStatus: async (req, res) => {
     try {
       const payload = req.body
-      const allTransaction = await WalletRequest.findByIdAndUpdate(payload.request_id,{status:payload.status})
+      const allTransaction = await WalletRequest.findByIdAndUpdate(payload.request_id, { status: payload.status })
       const user = await User.findById(allTransaction.userid);
-      user.wallet = (Number(user.wallet) || 0 ) - Number(allTransaction.amount)
+      user.wallet = (Number(user.wallet) || 0) - Number(allTransaction.amount)
       await user.save();
       await Transaction.create({
         userType: 'SELLER',
         notification: `${allTransaction.amount} amount debited from you wallet to transfer your require bank`,
         transactionType: 'DEBIT',
         userid: allTransaction.userid,
-        amount:Number(allTransaction.amount),
-    })
-  
-    res.status(200).json({
-      success: true,
-      data: allTransaction,
-    });
+        amount: Number(allTransaction.amount),
+      })
+
+      res.status(200).json({
+        success: true,
+        data: allTransaction,
+      });
       // });
     } catch (e) {
       return res.status(500).json({

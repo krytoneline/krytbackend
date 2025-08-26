@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Category = mongoose.model("Category");
 const response = require("./../responses");
-const mailNotification = require("../services/mailNotification");
+const mailNotification = require("../services/mailNotification1");
 
 
 
@@ -22,9 +22,9 @@ module.exports = {
 
     getCategory: async (req, res) => {
         try {
-            let cond ={}
-            if(req.query.type){
-               cond.type=req.query.type
+            let cond = {}
+            if (req.query.type) {
+                cond.type = req.query.type
             }
             let category = await Category.find(cond);
             return response.ok(res, category);

@@ -43,9 +43,9 @@ router.get("/userip", user.getIp);
 
 router.put("/updateplaninuser", isAuthenticated(["SELLER"]), user.updateplaninuser);
 router.post(
-  "/profile/changePassword",
-  isAuthenticated(["USER", "ADMIN","SELLER"]),
-  user.changePasswordProfile
+    "/profile/changePassword",
+    isAuthenticated(["USER", "ADMIN", "SELLER"]),
+    user.changePasswordProfile
 );
 
 router.get("/getProfile", isAuthenticated(["USER", "ADMIN", "SELLER"]), user.getProfile);
@@ -178,7 +178,7 @@ router.post(
     isAuthenticated(["USER", "ADMIN", "SELLER"]),
     product.deleteAllProduct
 );
-
+router.post("/createinvoice", product.createPdf);
 
 //Store
 router.get("/getStoreById/:id", store.getStoreById);
@@ -212,9 +212,9 @@ router.post(
     "/updatesetting",
     setting.updateSetting)
 
-    router.post(
-        "/chargeCPC",
-        setting.chargeCPC)
+router.post(
+    "/chargeCPC",
+    setting.chargeCPC)
 
 
 // product request

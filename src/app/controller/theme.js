@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Theme = mongoose.model("Theme");
 const response = require("./../responses");
-const mailNotification = require("../services/mailNotification");
+const mailNotification = require("../services/mailNotification1");
 
 
 

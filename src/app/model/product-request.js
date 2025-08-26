@@ -38,8 +38,8 @@ const productrequestchema = new mongoose.Schema({
                 default: 'Pending'
             },
             seller_id: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "User",
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
             },
         }
     ],
@@ -58,8 +58,11 @@ const productrequestchema = new mongoose.Schema({
     },
     total: {
         type: Number
-    }
-
+    },
+    orderId: {
+        type: String,
+        unique: true,
+    },
 }, {
     timestamps: true
 });

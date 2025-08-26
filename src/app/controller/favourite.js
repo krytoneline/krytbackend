@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Favourite = mongoose.model("Favourite");
 const response = require("./../responses");
-const mailNotification = require("../services/mailNotification");
+const mailNotification = require("../services/mailNotification1");
 
 
 
