@@ -15,6 +15,7 @@ const stripe = require("../../app/controller/stripe");
 const plan = require("../../app/controller/plan");
 const content = require("../../app/controller/content");
 const faq = require("../../app/controller/faq");
+const dashboard = require("../../app/controller/dashboard");
 
 
 router.post("/createConnection", user.createConnection);
@@ -305,5 +306,8 @@ router.post("/faq", isAuthenticated(["ADMIN"]), faq.create);
 router.delete("/deletfaq/:id", isAuthenticated(["ADMIN"]), faq.delete);
 router.post("/updatefaq/:id", isAuthenticated(["ADMIN"]), faq.update);
 router.get("/faq", faq.getFAQ);
+router.get("/dashboard", isAuthenticated(["ADMIN", "SELLER"]), dashboard.getDashboardData);
+router.get("/dashboard/monthly-chart", isAuthenticated(["ADMIN", "SELLER"]), dashboard.getMonthlyChartData);
+router.get("/dashboard/user-distribution", isAuthenticated(["ADMIN", "SELLER"]), dashboard.getUserDistribution);
 
 module.exports = router;
