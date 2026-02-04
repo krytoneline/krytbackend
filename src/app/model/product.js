@@ -1,96 +1,108 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
-const productchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const productchema = new mongoose.Schema(
+  {
     category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
     },
-    theme: [{
+    theme: [
+      {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Theme",
-    }],
+      },
+    ],
     userid: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    subCategoryName: {
+      type: String,
+    },
+    subcategory: {
+      _id: mongoose.Schema.Types.ObjectId,
+      name: String,
     },
     categoryName: {
-        type: String,
+      type: String,
     },
     category_type: {
-        type: String,
+      type: String,
     },
     gender: {
-        type: String,
+      type: String,
     },
     name: {
-        type: String,
+      type: String,
     },
     slug: {
-        type: String,
+      type: String,
     },
     image: {
-        type: String,
+      type: String,
     },
     short_description: {
-        type: String,
+      type: String,
     },
     long_description: {
-        type: String,
+      type: String,
     },
     price: {
-        type: Number,
+      type: Number,
     },
     offer: {
-        type: Number,
+      type: Number,
     },
     pieces: {
-        type: Number,
+      type: Number,
     },
     sold_pieces: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     varients: {
-        type: [],
+      type: [],
     },
     decoration_method: [],
     decoration_location: [],
     minQuantity: {
-        type: Number
+      type: Number,
     },
     parameter_type: {
-        type: String
+      type: String,
     },
     price_slot: [],
     is_verified: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     is_quality: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     sponsered: {
-        type: Boolean
+      type: Boolean,
     },
     attributes: [
-        {
-            name: { type: String },
-            value: { type: String, default: '' }
-        }
+      {
+        name: { type: String },
+        value: { type: String, default: "" },
+      },
     ],
-}, {
-    timestamps: true
+  },
+  {
+    timestamps: true,
+  },
+);
+
+productchema.set("toJSON", {
+  getters: true,
+  virtuals: false,
+  transform: (doc, ret, options) => {
+    delete ret.__v;
+    return ret;
+  },
 });
 
-productchema.set('toJSON', {
-    getters: true,
-    virtuals: false,
-    transform: (doc, ret, options) => {
-        delete ret.__v;
-        return ret;
-    }
-});
-
-module.exports = mongoose.model('Product', productchema);
+module.exports = mongoose.model("Product", productchema);
