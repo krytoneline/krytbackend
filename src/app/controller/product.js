@@ -681,7 +681,7 @@ module.exports = {
         .font("Helvetica")
         .text(order.orderId, 440, 85)
         .text(moment(order.createdAt).format("DD/MM/YYYY"), 450, 100)
-        .text(moment(order.createdAt).format("hh mm a"), 450, 115);
+        .text(moment(order.createdAt).format("hh:mm:a"), 450, 115);
       // .text(order.status, 450, 130);
 
       let orderType = "Store Pickup";

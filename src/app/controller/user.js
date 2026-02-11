@@ -13,21 +13,23 @@ const Store = mongoose.model("Store");
 const Verification = mongoose.model("Verification");
 const Notification = mongoose.model("Notification");
 const Review = mongoose.model("Review");
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 const { default: axios } = require("axios");
-const Transaction = mongoose.model('Transaction');
-const WalletRequest = mongoose.model('WalletRequest');
+const Transaction = mongoose.model("Transaction");
+const WalletRequest = mongoose.model("WalletRequest");
 const ChatConnection = mongoose.model("ChatConnection");
 
 module.exports = {
-
   createConnection: async (req, res) => {
     try {
-      const data = req.body
-      let con = await ChatConnection.findOne({ conn_id: data.conn_id })
+      const data = req.body;
+      let con = await ChatConnection.findOne({ conn_id: data.conn_id });
       if (!con) {
-        const c = await ChatConnection.create(data)
-        con = await ChatConnection.findOne({ conn_id: c.conn_id }).populate('user', 'username profile')
+        const c = await ChatConnection.create(data);
+        con = await ChatConnection.findOne({ conn_id: c.conn_id }).populate(
+          "user",
+          "username profile",
+        );
       }
       return response.ok(res, { Chatconnection: con });
     } catch (error) {
@@ -56,9 +58,9 @@ module.exports = {
         token,
         ...user._doc,
       };
-      if (user.type === 'SELLER') {
-        let store = await Store.findOne({ userid: user._id })
-        data.store = store
+      if (user.type === "SELLER") {
+        let store = await Store.findOne({ userid: user._id });
+        data.store = store;
       }
       delete data.password;
       return response.ok(res, { ...data });
@@ -67,14 +69,16 @@ module.exports = {
 
   updateplaninuser: async (req, res) => {
     try {
-      const newresponse = await User.findByIdAndUpdate(
-        req.user.id,
-        req.body,
-        { new: true, upsert: true }
-      );
+      const newresponse = await User.findByIdAndUpdate(req.user.id, req.body, {
+        new: true,
+        upsert: true,
+      });
       console.log("data updated");
-      return response.ok(res, { message: "Subscribed Succesfully", newresponse });
-    } catch { }
+      return response.ok(res, {
+        message: "Subscribed Succesfully",
+        newresponse,
+      });
+    } catch {}
   },
 
   signUp: async (req, res) => {
@@ -88,7 +92,7 @@ module.exports = {
         email: payload.email.toLowerCase(),
       });
       const user = await User.findOne({ number: payload.number });
-      console.log(user)
+      console.log(user);
       if (user) {
         return res.status(404).json({
           success: false,
@@ -105,7 +109,7 @@ module.exports = {
           username: payload?.username,
           email: payload?.email,
           number: payload?.number,
-          type: payload?.type
+          type: payload?.type,
         });
         user.password = user.encryptPassword(req.body.password);
         await user.save();
@@ -132,7 +136,7 @@ module.exports = {
       await user.save();
 
       await mailNotification.passwordChange({
-        email: user.email
+        email: user.email,
       });
 
       return response.ok(res, { message: "Password changed." });
@@ -143,7 +147,7 @@ module.exports = {
 
   me: async (req, res) => {
     try {
-      let user = userHelper.find({ _id: req.user.id }).lean()
+      let user = userHelper.find({ _id: req.user.id }).lean();
       return response.ok(res, user);
     } catch (error) {
       return response.error(res, error);
@@ -172,7 +176,7 @@ module.exports = {
       let ran_otp = Math.floor(1000 + Math.random() * 9000);
       await mailNotification.sendOTPmail({
         code: ran_otp,
-        email: email
+        email: email,
       });
       // let ran_otp = "0000";
       // if (
@@ -210,7 +214,7 @@ module.exports = {
         new Date().getTime() < new Date(ver.expiration_at).getTime()
       ) {
         let token = await userHelper.encode(
-          ver._id + ":" + userHelper.getDatewithAddedMinutes(5).getTime()
+          ver._id + ":" + userHelper.getDatewithAddedMinutes(5).getTime(),
         );
         ver.verified = true;
         await ver.save();
@@ -244,7 +248,7 @@ module.exports = {
       user.password = user.encryptPassword(password);
       await user.save();
       await mailNotification.passwordChange({
-        email: user.email
+        email: user.email,
       });
       return response.ok(res, { message: "Password changed ! Login now." });
     } catch (error) {
@@ -263,32 +267,44 @@ module.exports = {
 
   getSellerList: async (req, res) => {
     try {
-      // let user = await User.find({ type: req.params.type });
-      let cond = {}
-      if (req.body.curDate) {
-        const newEt = new Date(new Date(req.body.curDate).setDate(new Date(req.body.curDate).getDate() + 1))
-        cond.createdAt = { $gte: new Date(req.body.curDate), $lte: newEt };
+      let cond = {};
+
+      // Type filter from body
+      if (req.body.type) {
+        cond.type = req.body.type;
       }
+
+      // Date filter
+      if (req.body.curDate) {
+        const startDate = new Date(req.body.curDate);
+        const endDate = new Date(
+          new Date(req.body.curDate).setDate(startDate.getDate() + 1),
+        );
+
+        cond.createdAt = { $gte: startDate, $lte: endDate };
+      }
+
       let user = await User.aggregate([
         {
-          $match: cond
+          $match: cond,
         },
         { $sort: { createdAt: -1 } },
         {
           $lookup: {
-            from: 'stores',
-            localField: '_id',
-            foreignField: 'userid',
-            as: 'store',
-          }
+            from: "stores",
+            localField: "_id",
+            foreignField: "userid",
+            as: "store",
+          },
         },
         {
           $unwind: {
-            path: '$store',
-            preserveNullAndEmptyArrays: true
-          }
+            path: "$store",
+            preserveNullAndEmptyArrays: true,
+          },
         },
-      ])
+      ]);
+
       return response.ok(res, user);
     } catch (error) {
       return response.error(res, error);
@@ -358,7 +374,7 @@ module.exports = {
     try {
       await User.updateOne(
         { email: req.body.email },
-        { $set: { verified: req.body.verified } }
+        { $set: { verified: req.body.verified } },
       );
       return response.ok(res, {
         message: req.body.verified ? "Guard Verified." : "Guard Suspended.",
@@ -380,7 +396,7 @@ module.exports = {
 
   getProfile: async (req, res) => {
     try {
-      const u = await User.findById(req.user.id, '-password');
+      const u = await User.findById(req.user.id, "-password");
       return response.ok(res, u);
     } catch (error) {
       return response.error(res, error);
@@ -388,7 +404,7 @@ module.exports = {
   },
   updateProfile: async (req, res) => {
     const payload = req.body;
-    const userId = req?.body?.userId || req.user.id
+    const userId = req?.body?.userId || req.user.id;
     try {
       // const data = await User.findByIdAndUpdate(userId, payload, { new: true, upsert: true })
       // return response.ok(res, data);
@@ -459,7 +475,7 @@ module.exports = {
         {
           new: true,
           upsert: true,
-        }
+        },
       );
       let token = await new jwtService().createJwtToken({
         id: u._id,
@@ -473,7 +489,6 @@ module.exports = {
       // await Verification.findOneAndDelete({ phone: payload.phone });
       return response.ok(res, data);
       // }
-
 
       // }
     } catch (error) {
@@ -508,7 +523,7 @@ module.exports = {
   updateGetInTouch: async (req, res) => {
     try {
       await Getintouch.findByIdAndUpdate(req.params.id, { read: true });
-      return response.ok(res, { message: 'read' });
+      return response.ok(res, { message: "read" });
     } catch (error) {
       return response.error(res, error);
     }
@@ -516,9 +531,13 @@ module.exports = {
 
   getGetInTouch: async (req, res) => {
     try {
-      let cond = {}
+      let cond = {};
       if (req.body.curDate) {
-        const newEt = new Date(new Date(req.body.curDate).setDate(new Date(req.body.curDate).getDate() + 1))
+        const newEt = new Date(
+          new Date(req.body.curDate).setDate(
+            new Date(req.body.curDate).getDate() + 1,
+          ),
+        );
         cond.createdAt = { $gte: new Date(req.body.curDate), $lte: newEt };
       }
       let blog = await Getintouch.find(cond).sort({ createdAt: -1 });
@@ -530,8 +549,8 @@ module.exports = {
 
   deleteGetInTouch: async (req, res) => {
     try {
-      let blog = await Getintouch.findByIdAndDelete(req.params.id)
-      return response.ok(res, { message: 'Deleted successfully' });
+      let blog = await Getintouch.findByIdAndDelete(req.params.id);
+      return response.ok(res, { message: "Deleted successfully" });
     } catch (error) {
       return response.error(res, error);
     }
@@ -566,7 +585,7 @@ module.exports = {
   DeleteNewsLetter: async (req, res) => {
     try {
       let news = await Newsletter.findByIdAndDelete(req.body.id);
-      return response.ok(res, { message: 'Deleted successfully' });
+      return response.ok(res, { message: "Deleted successfully" });
     } catch (error) {
       return response.error(res, error);
     }
@@ -578,11 +597,11 @@ module.exports = {
       let payload = req.body;
       let cond = {
         posted_by: req.user.id,
-      }
+      };
       if (payload.seller) {
-        cond.seller = payload.seller
+        cond.seller = payload.seller;
       } else {
-        cond.product = payload.product
+        cond.product = payload.product;
       }
       const re = await Review.findOne(cond);
 
@@ -604,12 +623,14 @@ module.exports = {
 
   getReview: async (req, res) => {
     try {
-      const cond = {}
+      const cond = {};
       if (req.params.id) {
-        cond.user = req.params.id
+        cond.user = req.params.id;
       }
-      const allreview = await Review.find(cond)
-        .populate("posted_by user", "-password")
+      const allreview = await Review.find(cond).populate(
+        "posted_by user",
+        "-password",
+      );
       res.status(200).json({
         success: true,
         data: allreview,
@@ -625,7 +646,9 @@ module.exports = {
 
   getTransaction: async (req, res) => {
     try {
-      const allTransaction = await Transaction.find({ userid: req.user.id }).sort({ "createdAt": -1 })
+      const allTransaction = await Transaction.find({
+        userid: req.user.id,
+      }).sort({ createdAt: -1 });
       res.status(200).json({
         success: true,
         data: allTransaction,
@@ -641,12 +664,13 @@ module.exports = {
 
   createWalletRequest: async (req, res) => {
     try {
-      req.body.userid = req.user.id
-      const u = await User.findById(req.user.id)
+      req.body.userid = req.user.id;
+      const u = await User.findById(req.user.id);
       if (u.wallet < req.body.amount) {
         return res.status(400).json({
           success: false,
-          message: "Insufficient funds. Please check your balance and try again.",
+          message:
+            "Insufficient funds. Please check your balance and try again.",
         });
       }
       const allTransaction = await WalletRequest.create(req.body);
@@ -666,11 +690,13 @@ module.exports = {
 
   getWalletRequest: async (req, res) => {
     try {
-      const cond = {}
-      if (req.user.type === 'SELLER') {
-        cond.userid = req.user.id
+      const cond = {};
+      if (req.user.type === "SELLER") {
+        cond.userid = req.user.id;
       }
-      const allTransaction = await WalletRequest.find(cond).populate('userid', 'wallet').sort({ 'createdAt': -1 })
+      const allTransaction = await WalletRequest.find(cond)
+        .populate("userid", "wallet")
+        .sort({ createdAt: -1 });
       res.status(200).json({
         success: true,
         data: allTransaction,
@@ -684,21 +710,23 @@ module.exports = {
     }
   },
 
-
   UpdateWalletStatus: async (req, res) => {
     try {
-      const payload = req.body
-      const allTransaction = await WalletRequest.findByIdAndUpdate(payload.request_id, { status: payload.status })
+      const payload = req.body;
+      const allTransaction = await WalletRequest.findByIdAndUpdate(
+        payload.request_id,
+        { status: payload.status },
+      );
       const user = await User.findById(allTransaction.userid);
-      user.wallet = (Number(user.wallet) || 0) - Number(allTransaction.amount)
+      user.wallet = (Number(user.wallet) || 0) - Number(allTransaction.amount);
       await user.save();
       await Transaction.create({
-        userType: 'SELLER',
+        userType: "SELLER",
         notification: `${allTransaction.amount} amount debited from you wallet to transfer your require bank`,
-        transactionType: 'DEBIT',
+        transactionType: "DEBIT",
         userid: allTransaction.userid,
         amount: Number(allTransaction.amount),
-      })
+      });
 
       res.status(200).json({
         success: true,
@@ -715,8 +743,10 @@ module.exports = {
 
   deleteWalletRequest: async (req, res) => {
     try {
-      const payload = req.body
-      const allTransaction = await WalletRequest.findByIdAndDelete(payload.request_id);
+      const payload = req.body;
+      const allTransaction = await WalletRequest.findByIdAndDelete(
+        payload.request_id,
+      );
       res.status(200).json({
         success: true,
         data: allTransaction,
