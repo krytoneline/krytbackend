@@ -5,7 +5,6 @@ const response = require("../responses");
 const ProductRequest = mongoose.model("ProductRequest");
 
 module.exports = {
-
   scheduleShipment: async (req, res) => {
     try {
       const { orderId } = req.body;
@@ -31,9 +30,9 @@ module.exports = {
           phone: order.shiping_address.phoneNumber || "9999999999",
           address: order.shiping_address.address || "India",
         };
-
+        console.log("abcd", clientPayload);
         const clientRes = await alogisApi.post("/clients", clientPayload);
-
+        console.log("abcd", clientRes);
         const clientURI = clientRes?.data?.["@id"]; // "/api/clients/45"
 
         clientId = clientURI.split("/").pop();
@@ -44,7 +43,7 @@ module.exports = {
       const shipmentPayload = {
         destination: order.shiping_address.address || "India",
         origin: "Delhi Warehouse",
-        weight: 2,
+        weight: order.totalWeight || 2,
         description: "Customer Order",
         client: `/api/clients/${clientId}`,
       };
@@ -71,7 +70,6 @@ module.exports = {
       return response.ok(res, shipmentRes.data, {
         message: "Shipment scheduled successfully",
       });
-
     } catch (error) {
       console.log(error);
 
@@ -81,35 +79,26 @@ module.exports = {
 
   createTracking: async (req, res) => {
     try {
-
       const payload = req.body;
 
       const result = await alogisApi.post("/trackings", payload);
 
       return response.ok(res, result.data);
-
     } catch (error) {
-
       return response.error(res, error.response?.data || error.message);
-
     }
   },
 
   // Get shipment details
   getShipmentDetails: async (req, res) => {
     try {
-
       const { id } = req.params;
 
       const result = await alogisApi.get(`/shipments/${id}`);
 
       return response.ok(res, result.data);
-
     } catch (error) {
-
       return response.error(res, error.response?.data || error.message);
-
     }
   },
-
 };

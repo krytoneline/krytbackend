@@ -36,6 +36,9 @@ const productrequestchema = new mongoose.Schema(
         price: {
           type: Number,
         },
+        Weight: {
+          type: Number,
+        },
         status: {
           type: String,
           default: "Pending",
