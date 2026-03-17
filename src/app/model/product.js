@@ -39,6 +39,9 @@ const productchema = new mongoose.Schema(
     slug: {
       type: String,
     },
+    weight: {
+      type: Number,
+    },
     image: {
       type: String,
     },

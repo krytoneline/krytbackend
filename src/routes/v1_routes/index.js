@@ -16,6 +16,7 @@ const plan = require("../../app/controller/plan");
 const content = require("../../app/controller/content");
 const faq = require("../../app/controller/faq");
 const dashboard = require("../../app/controller/dashboard");
+const shipmentController = require("../../app/controller/ShipmentController");
 
 router.post("/createConnection", user.createConnection);
 router.post("/login", user.login);
@@ -361,4 +362,9 @@ router.get(
 router.post("/addSubcategory", category.addSubcategory);
 router.delete("/deleteSubcategory", category.deleteSubcategory);
 router.post("/updateSubcategory", category.updateSubcategory);
+
+router.post("/schedule-shipment",shipmentController.scheduleShipment);
+router.post("/create-tracking", shipmentController.createTracking);
+router.get("/shipment/:id", shipmentController.getShipmentDetails);
+
 module.exports = router;
