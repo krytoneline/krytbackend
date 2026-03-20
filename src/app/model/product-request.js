@@ -81,6 +81,23 @@ const productrequestchema = new mongoose.Schema(
     totalWeight: {
       type: Number,
     },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Success", "Failed"],
+      default: "Pending",
+    },
+
+    paymentMode: {
+      type: String,
+    },
+
+    transactionId: {
+      type: String,
+    },
+
+    paymentId: {
+      type: String,
+    },
   },
   {
     timestamps: true,
