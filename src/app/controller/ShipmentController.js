@@ -26,10 +26,11 @@ module.exports = {
       if (!clientId) {
         const clientPayload = {
           name: order.shiping_address.firstName || "Customer",
-          email: order.shiping_address.email || "test@gmail.com",
-          phone: order.shiping_address.phoneNumber || "9999999999",
+          email: order.shiping_address.email || `test${Date.now()}@gmail.com`, // avoid duplicate
+          phone: order.shiping_address.phoneNumber || "9876543210", // MUST 10 digit
           address: order.shiping_address.address || "India",
         };
+
         console.log("abcd", clientPayload);
         const clientRes = await alogisApi.post("/clients", clientPayload);
         console.log("abcd", clientRes);

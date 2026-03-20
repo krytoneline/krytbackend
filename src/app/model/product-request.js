@@ -76,8 +76,9 @@ const productrequestchema = new mongoose.Schema(
       type: String,
     },
     trackingNumber: {
-      type: Number,
+      type: String,
     },
+
     totalWeight: {
       type: Number,
     },
